@@ -1,0 +1,8 @@
+/* Styles for highlighting active navbar item */
+.nav-link.active {
+    background-color: rgba(0, 0, 0, 0.1); /* Adjust transparency as needed */
+}
+
+.nav-link.active[aria-current="page"]  { /* Style for 'red' on home page */
+    color: red !important;
+}
