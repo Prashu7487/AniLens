@@ -3,7 +3,8 @@ from dash import dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 from pages import Home, overview, trends, comparison, similar_anime
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, './assets/styles.css'])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, './assets/styles.css']
+                , suppress_callback_exceptions=True)
 
 # Navbar
 navbar = dbc.Navbar(
