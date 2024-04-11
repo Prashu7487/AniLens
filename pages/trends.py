@@ -4,10 +4,47 @@ from dash import dcc, html, Input, Output, callback
 import numpy as np
 import plotly.express as px
 import os
-#
-# Episode Duration vs. Popularity Scatter Plot: Investigate the correlation between episode duration and anime
-# popularity, generating a scatter plot to identify patterns
-# in viewer preferences.
+from dash import html, dcc, callback
+
+
+def adaptation_source_trends():
+    # Load Data
+    data = pd.read_csv(os.path.abspath('./data/anime_cleaned.csv'))
+    season_year = data['Premiered'].map(extract_season_year)
+    premiered_season = season_year.apply(lambda x: x[0])
+    premiered_year = season_year.apply(lambda x: x[1])
+    data['Premiered'] = premiered_year
+    data['Premiered'] = data['Premiered'].astype('int')
+    data = data[data['Premiered'] <= 2020]
+    data = data[data['Premiered'] >= 2015]
+    data = data[data['Source'] != 'Unknown']
+    data = data[data['Source'].apply(lambda x: x in ['Manga', 'Light Novel', 'Other', 'Game', 'Original'])]
+    # Create a bar chart which shows the source of anime adaptations
+    data = data.groupby(['Source', 'Premiered']).size().reset_index(name='Count')
+    adaptation_fig = px.bar(data, x='Premiered', y='Count', color='Source', title='Adaptation Source Trends')
+    return adaptation_fig
+
+
+def seasonal_anime_ratings():
+    # Load Data
+    data = pd.read_csv(os.path.abspath('./data/anime_cleaned.csv'))
+    # Create a bar chart which shows avg score in each season for last five years
+    season_year = data['Premiered'].map(extract_season_year)
+    premiered_season = season_year.apply(lambda x: x[0])
+    premiered_year = season_year.apply(lambda x: x[1])
+    data['Premiered'] = premiered_year
+    data['Season'] = premiered_season
+    data['Score'] = data[data['Score'] != 'Unknown']['Score'].astype('float')
+    # convert premiered column to int
+    data['Premiered'] = data['Premiered'].astype('int')
+    # get last 5 years data
+    data = data[data['Premiered'] <= 2020]
+    data = data[data['Premiered'] >= 2015]
+    data = data.groupby(['Premiered', 'Season']).agg({'Score': 'mean'}).reset_index()
+    seasonal_fig = px.bar(data, x='Premiered', y='Score', color='Season', title='Seasonal Anime Ratings',
+                          color_continuous_scale='plasma')
+    return seasonal_fig
+
 
 def top_10_anime_based_on_most_genre():
     # Load Data
@@ -117,33 +154,46 @@ fig.update_layout(margin=dict(l=60, r=60, t=50, b=50),
 # fig1 = px.line(x=number_of_anime_released_per_year().index, y=number_of_anime_released_per_year().values,
 #                labels={'x': 'Year', 'y': 'Number of Anime Released'})
 # Assuming Dash setup exists ...
-layout = html.Div([dcc.Graph(figure=fig),
-                   # adding a graph to show the number of anime released per year
-                   dcc.RadioItems(
-                       id='radio-items',
-                       options=[
-                           {'label': 'Completed', 'value': 'completed'},
-                           {'label': 'Watching', 'value': 'watching'},
-                           {'label': 'On hold', 'value': 'on_hold'},
-                           {'label': 'Plan to watch', 'value': 'plan_to_watch'},
-                           {'label': 'Dropped', 'value': 'dropped'},
-                           {'label': 'Favorite', 'value': 'favorite'},
-                       ],
-                       value="completed",
-                       labelStyle={'display': 'inline-block'}
-                   ),
-                   dcc.Graph(id='bar_graph'),
-                   # create dropdown to select genre
-                   dcc.Dropdown(
-                       id='genre-dropdown',
-                       options=list_of_all_genres,
-                       value=['Action'],
-                       multi=True
-                   ),
-                   dcc.Graph(id='genre-graph'),
-                   dcc.Graph(figure=rating_evoution_over_decade()),
-                   dcc.Graph(figure=ep_duration_vs_popularity_scatter_plot()),
-                   ])
+layout = html.Div([
+    html.Div(
+        [dcc.Graph(figure=fig),
+         ]),
+    html.Div([
+        dcc.RadioItems(
+            id='radio-items',
+            options=[
+                {'label': 'Completed', 'value': 'completed'},
+                {'label': 'Watching', 'value': 'watching'},
+                {'label': 'On hold', 'value': 'on_hold'},
+                {'label': 'Plan to watch', 'value': 'plan_to_watch'},
+                {'label': 'Dropped', 'value': 'dropped'},
+                {'label': 'Favorite', 'value': 'favorite'},
+            ],
+            value="completed",
+            labelStyle={'display': 'inline-block'}
+        ),
+        dcc.Graph(id='bar_graph')
+    ]),
+    html.Div([
+        html.Div([dcc.Dropdown(
+                id='genre-dropdown',
+                options=list_of_all_genres,
+                value=['Action'],
+                multi=True
+            ),
+            dcc.Graph(id='genre-graph'), ],style={'width': '50%','border':'1px solid #ccc','padding':'10px'}),
+        dcc.Graph(figure=rating_evoution_over_decade()),
+    ],style={'display': 'flex', 'justify-content': 'space-around','flex-direction':'row','border':'1px solid #ccc','padding':'10px'}),
+    html.Div([
+
+    ]),
+    html.Div([
+        dcc.Graph(figure=adaptation_source_trends()),
+    ]),
+    html.Div([
+        dcc.Graph(figure=seasonal_anime_ratings()),
+    ]),
+])
 
 
 @callback(

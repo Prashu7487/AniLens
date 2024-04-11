@@ -18,34 +18,34 @@ most_watched = most_watched[(anime_df['Score'] != 'Unknown') & (anime_df['Genres
 list_of_all_genres = most_watched['Genres'].apply(lambda x: x.split(', ')).explode().unique().tolist()
 
 component_1 = dbc.Row([
-        html.H2("Most Watched Anime",
-                style={'marginTop': '50px', 'marginBottom': '100px'}),
-        dbc.Col([
-            html.Div([  # Wrap slider in a Div with margin
-                dcc.Slider(0, 10, 1, value=5, marks=None,id='score-slider',
-                           tooltip={"placement": "bottom", "always_visible": True})
-            ], style={'marginTop': '50px', 'marginBottom': '100px'}),  # Add margin-bottom
-            html.Div([  # Wrap dropdown in a Div
-                dcc.Dropdown(
-                    options=[{'label': genre, 'value': genre} for genre in list_of_all_genres],
-                    multi=True, id='genre-dropdown', value=['Action', 'Comedy'], clearable=False
-                )
-            ], style={'paddingLeft': '15px', 'paddingRight': '15px', 'marginTop': '50px', 'marginBottom': '100px'}),
-            html.Div([  # Wrap range slider in a Div
-                dcc.RangeSlider(min=1, max=3057, step=1, value=[100, 300], id='episodes-slider', marks=None,
-                                tooltip={
-                                    "placement": "bottom",
-                                    "always_visible": True,
-                                    "style": {"color": "LightSteelBlue", "fontSize": "10px"},
-                                })
-            ], style={'marginBottom': '30px'}),
-            html.Button('Update', id='update-button', n_clicks=0,
-                        style={'display': 'block', 'margin': 'auto'}),
-        ], width=6),
-        dbc.Col([
-            dcc.Graph(id='most-watched-graph', figure={})
-        ], width=6)
-    ])
+    html.H2("Most Watched Anime",
+            style={'marginTop': '50px', 'marginBottom': '100px'}),
+    dbc.Col([
+        html.Div([  # Wrap slider in a Div with margin
+            dcc.Slider(0, 10, 1, value=5, marks=None, id='score-slider',
+                       tooltip={"placement": "bottom", "always_visible": True})
+        ], style={'marginTop': '50px', 'marginBottom': '100px'}),  # Add margin-bottom
+        html.Div([  # Wrap dropdown in a Div
+            dcc.Dropdown(
+                options=[{'label': genre, 'value': genre} for genre in list_of_all_genres],
+                multi=True, id='genre-dropdown', value=['Action', 'Comedy'], clearable=False
+            )
+        ], style={'paddingLeft': '15px', 'paddingRight': '15px', 'marginTop': '50px', 'marginBottom': '100px'}),
+        html.Div([  # Wrap range slider in a Div
+            dcc.RangeSlider(min=1, max=3057, step=1, value=[100, 300], id='episodes-slider', marks=None,
+                            tooltip={
+                                "placement": "bottom",
+                                "always_visible": True,
+                                "style": {"color": "LightSteelBlue", "fontSize": "10px"},
+                            })
+        ], style={'marginBottom': '30px'}),
+        html.Button('Update', id='update-button', n_clicks=0,
+                    style={'display': 'block', 'margin': 'auto'}),
+    ], width=6),
+    dbc.Col([
+        dcc.Graph(id='most-watched-graph', figure={})
+    ], width=6)
+])
 
 
 @callback(
@@ -98,6 +98,7 @@ def update_graph(n_clicks, selected_score, selected_genres, selected_episodes_ra
 
     return fig
 
+
 #########################################################################################  Component 2
 
 
@@ -109,28 +110,30 @@ pop_year = pop_year[['Name', 'Premiered', 'Popularity']]
 pop_year['Premiered'] = pop_year['Premiered'].str.split().str[-1].astype(int)
 
 component_2 = html.Div([
-            html.Div(html.H2("Most Popular Anime in year range"),
-                     style={'marginTop': '70px', 'marginBottom': '30px'}),
-            html.Div([
-                dcc.RangeSlider(min=1963, max=2020, value=[1975, 2000], step=1,
-                                id='year-range-slider', allowCross=False,
-                                className='my-range-slider', marks=None
-                                , tooltip={
-                                            "placement": "bottom",
-                                            "always_visible": True,
-                                            "style": {"color": "LightSteelBlue", "fontSize": "10px"},
-                                            },)
-            ], style={'paddingLeft': '200px', 'paddingRight': '200px', 'marginBottom': '25px'}),
+    html.Div(html.H2("Most Popular Anime in year range"),
+             style={'marginTop': '70px', 'marginBottom': '30px'}),
+    html.Div([
+        dcc.RangeSlider(min=1963, max=2020, value=[1975, 2000], step=1,
+                        id='year-range-slider', allowCross=False,
+                        className='my-range-slider', marks=None
+                        , tooltip={
+                "placement": "bottom",
+                "always_visible": True,
+                "style": {"color": "LightSteelBlue", "fontSize": "10px"},
+            }, )
+    ], style={'paddingLeft': '200px', 'paddingRight': '200px', 'marginBottom': '25px'}),
 
-            html.Div([
-                html.Div([
-                    dcc.Graph(id='popularity-word-cloud', figure={}),
-                ], style={'width': '50%'}),
-                html.Div([
-                    dcc.Graph(id='release-per-year', figure={}),
-                ], style={'width': '50%', 'marginLeft': '70px', 'border': 'solid', 'border-color': 'black'})
-            ], style={'display': 'flex', 'flex-direction': 'row', 'border': 'solid', 'border-color': 'black'})
-    ])
+    html.Div([
+        html.Div([
+            dcc.Graph(id='popularity-word-cloud', figure={}),
+        ], style={'width': '45%', 'border': 'solid', 'border-color': 'black',}),
+        html.Div([
+            dcc.Graph(id='release-per-year', figure={}),
+        ], style={'width': '45%', 'border': 'solid', 'border-color': 'black'})
+    ], style={'display': 'flex', 'flex-direction': 'row', 'border': 'solid',
+              'border-color': 'black', 'width': '90%', 'margin': 'auto','justify-content':'space-between'})  # Added align-items
+
+])
 
 
 @callback(
@@ -152,10 +155,8 @@ def update_graph(selected_years_range):
         marker_color=filtered_data['Premiered'].value_counts().index
     ))
     year_bar.update_layout(
-        margin=dict(l=0, r=100, t=0, b=0),
-        height=400,
-        width=800
-        )
+        margin=dict(l=0, r=0, t=0, b=0),
+    )
 
     filtered_data = filtered_data.sort_values(by='Premiered', ascending=False).head(150)
     text_data = ' '.join(
@@ -163,19 +164,20 @@ def update_graph(selected_years_range):
     )
 
     # Generate Word Cloud
-    wordcloud = WordCloud(width=900, height=500,
-                          background_color='white', collocations=False, colormap='gist_earth',
-                          max_words=100, max_font_size=100).generate(text_data)
+    wordcloud = WordCloud(
+        background_color='white', collocations=False, colormap='gist_earth',
+        max_words=100, max_font_size=100).generate(text_data)
 
-    cloud = px.imshow(wordcloud.to_array())
+    cloud = px.imshow(wordcloud.to_array(), aspect='fill')
     cloud.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis_showticklabels=False,
         yaxis_showticklabels=False,
     )
-
     cloud.update_traces(hoverinfo='skip')
     return cloud, year_bar
+
+
 ######################################################################################### Component3
 
 #########################################################################################  Home_Layout
@@ -184,5 +186,4 @@ def update_graph(selected_years_range):
 layout = dbc.Container([
     component_1,
     component_2
-    ], fluid=True, style={'marginLeft': '30px', 'marginRight': '30px', 'width': '80%'})
-
+], fluid=True, style={'margin': 'auto', 'width': '100%'})
