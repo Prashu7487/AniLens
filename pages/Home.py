@@ -30,7 +30,7 @@ component_1 = dbc.Row([
                     options=[{'label': genre, 'value': genre} for genre in list_of_all_genres],
                     multi=True, id='genre-dropdown', value=['Action', 'Comedy'], clearable=False
                 )
-            ], style={'marginLeft': '15px', 'marginRight': '15px', 'marginTop': '50px', 'marginBottom': '100px'}),
+            ], style={'paddingLeft': '15px', 'paddingRight': '15px', 'marginTop': '50px', 'marginBottom': '100px'}),
             html.Div([  # Wrap range slider in a Div
                 dcc.RangeSlider(min=1, max=3057, step=1, value=[100, 300], id='episodes-slider', marks=None,
                                 tooltip={
@@ -40,7 +40,7 @@ component_1 = dbc.Row([
                                 })
             ], style={'marginBottom': '30px'}),
             html.Button('Update', id='update-button', n_clicks=0,
-                        style={'marginTop': '10px', 'display': 'block', 'margin': 'auto'}),
+                        style={'display': 'block', 'margin': 'auto'}),
         ], width=6),
         dbc.Col([
             dcc.Graph(id='most-watched-graph', figure={})
@@ -77,7 +77,7 @@ def update_graph(n_clicks, selected_score, selected_genres, selected_episodes_ra
         (most_watched['Episodes'].apply(is_valid_episode))
         ]
 
-    filtered_df = filtered_df.sort_values(by='Completed', ascending=False).head(10)
+    filtered_df = filtered_df.sort_values(by='Completed', ascending=False).head(13)
     filtered_df['Name'] = filtered_df['Name'].apply(truncate_labels)
 
     fig = px.bar(
@@ -90,9 +90,9 @@ def update_graph(n_clicks, selected_score, selected_genres, selected_episodes_ra
     )
 
     fig.update_layout(
-        margin=dict(l=10, r=0, t=0, b=0),
+        margin=dict(l=100, r=0, t=0, b=0),
         width=800,
-        height=600,
+        height=500,
         coloraxis_showscale=False
     )
 
@@ -108,9 +108,9 @@ pop_year = pop_year[['Name', 'Premiered', 'Popularity']]
 #  refining premiered col to contain only year as per this use case
 pop_year['Premiered'] = pop_year['Premiered'].str.split().str[-1].astype(int)
 
-component_2 = dbc.Row([
+component_2 = html.Div([
             html.Div(html.H2("Most Popular Anime in year range"),
-                     style={'marginLeft': '50px', 'marginTop': '70px', 'marginBottom': '30px'}),
+                     style={'marginTop': '70px', 'marginBottom': '30px'}),
             html.Div([
                 dcc.RangeSlider(min=1963, max=2020, value=[1975, 2000], step=1,
                                 id='year-range-slider', allowCross=False,
@@ -120,13 +120,16 @@ component_2 = dbc.Row([
                                             "always_visible": True,
                                             "style": {"color": "LightSteelBlue", "fontSize": "10px"},
                                             },)
-            ], style={'marginLeft': '200px', 'marginRight': '200px', 'marginBottom': '25px'}),
-            dbc.Col([
-                dcc.Graph(id='popularity-word-cloud', figure={})
-            ], width=6),
-            dbc.Col([
-                dcc.Graph(id='release-per-year', figure={})
-            ], width=6)
+            ], style={'paddingLeft': '200px', 'paddingRight': '200px', 'marginBottom': '25px'}),
+
+            html.Div([
+                html.Div([
+                    dcc.Graph(id='popularity-word-cloud', figure={}),
+                ], style={'width': '50%'}),
+                html.Div([
+                    dcc.Graph(id='release-per-year', figure={}),
+                ], style={'width': '50%', 'marginLeft': '70px', 'border': 'solid', 'border-color': 'black'})
+            ], style={'display': 'flex', 'flex-direction': 'row', 'border': 'solid', 'border-color': 'black'})
     ])
 
 
@@ -148,7 +151,11 @@ def update_graph(selected_years_range):
         orientation='h',
         marker_color=filtered_data['Premiered'].value_counts().index
     ))
-    year_bar.update_layout(margin=dict(l=10, r=0, t=0, b=0))
+    year_bar.update_layout(
+        margin=dict(l=0, r=100, t=0, b=0),
+        height=400,
+        width=800
+        )
 
     filtered_data = filtered_data.sort_values(by='Premiered', ascending=False).head(150)
     text_data = ' '.join(
@@ -156,13 +163,13 @@ def update_graph(selected_years_range):
     )
 
     # Generate Word Cloud
-    wordcloud = WordCloud(width=750, height=350, stopwords=STOPWORDS,
-                          background_color='white',collocations=False, colormap='gist_earth',
+    wordcloud = WordCloud(width=900, height=500,
+                          background_color='white', collocations=False, colormap='gist_earth',
                           max_words=100, max_font_size=100).generate(text_data)
 
     cloud = px.imshow(wordcloud.to_array())
     cloud.update_layout(
-        margin=dict(l=10, r=0, t=0, b=0),
+        margin=dict(l=0, r=0, t=0, b=0),
         xaxis_showticklabels=False,
         yaxis_showticklabels=False,
     )
@@ -177,5 +184,5 @@ def update_graph(selected_years_range):
 layout = dbc.Container([
     component_1,
     component_2
-    ], fluid=True, style={'marginLeft': '50px', 'marginRight': '50px'})
+    ], fluid=True, style={'marginLeft': '30px', 'marginRight': '30px', 'width': '80%'})
 

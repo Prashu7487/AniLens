@@ -1,5 +1,5 @@
 /* Styles for highlighting active navbar item */
-.nav-link.active {
+nav-link.active {
     background-color: rgba(0, 0, 0, 0.1); /* Adjust transparency as needed */
 }
 
@@ -25,3 +25,4 @@
     background-color: white;  /* Customize as desired */
     border: 2px solid black;  /* Customize as desired */
 }
+
