@@ -5,6 +5,7 @@ from pages import Home, overview, trends, comparison, similar_anime
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, './assets/styles.css']
                 , suppress_callback_exceptions=True)
+app.title = 'AniLens'
 
 # Navbar
 navbar = dbc.Navbar(
