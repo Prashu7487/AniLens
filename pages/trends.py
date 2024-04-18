@@ -3,6 +3,7 @@ import geopandas as gpd
 from dash import dcc, html, Input, Output, callback
 import numpy as np
 import plotly.express as px
+import dash_bootstrap_components as dbc
 import os
 from dash import html, dcc, callback
 
@@ -84,7 +85,7 @@ def rating_evoution_over_decade():
     # group data based on rated
     # remove unknown values
     data = data[data['Rating'] != 'Unknown']
-    data = data.groupby(['Decade', 'Rating']).size().reset_index(name='Count')
+    data = data.groupby(['Decade', 'Rating'], observed=False).size().reset_index(name='Count')
     # create a pivot table
     data = data.pivot(index='Decade', columns='Rating', values='Count')
     data = data.fillna(0)
@@ -158,32 +159,53 @@ layout = html.Div([
     html.Div(
         [dcc.Graph(figure=fig),
          ]),
-    html.Div([
-        dcc.RadioItems(
-            id='radio-items',
-            options=[
-                {'label': 'Completed', 'value': 'completed'},
-                {'label': 'Watching', 'value': 'watching'},
-                {'label': 'On hold', 'value': 'on_hold'},
-                {'label': 'Plan to watch', 'value': 'plan_to_watch'},
-                {'label': 'Dropped', 'value': 'dropped'},
-                {'label': 'Favorite', 'value': 'favorite'},
+    dbc.Container(
+        dbc.Card(
+            [
+                dbc.CardBody(
+                    [
+                        html.H1("Anime Status Dashboard", className='card-title', style={'marginBottom': '20px'}),
+                        dbc.RadioItems(
+                            id='radio-items',
+                            options=[
+                                {'label': 'Completed', 'value': 'completed'},
+                                {'label': 'Watching', 'value': 'watching'},
+                                {'label': 'On hold', 'value': 'on_hold'},
+                                {'label': 'Plan to watch', 'value': 'plan_to_watch'},
+                                {'label': 'Dropped', 'value': 'dropped'},
+                                {'label': 'Favorite', 'value': 'favorite'},
+                            ],
+                            value="completed",
+                            inline=True,  # Make the radio buttons appear horizontally
+                            labelStyle={'display': 'inline-block', 'margin': '0px 10px 10px 0px',
+                                        'verticalAlign': 'middle'}
+                        ),
+                        dcc.Graph(
+                            id='bar_graph',
+                            config={'displayModeBar': False},
+                            style={'border': '1px solid #ccc', 'borderRadius': '10px', 'margin': '10px 0px',
+                                   'boxShadow': '0 4px 8px rgba(0,0,0,0.1)', 'background-color': '#f8f9fa',
+                                   'overflow': 'hidden'}  # Add overflow:hidden to ensure rounded corners are visible
+                        )
+                    ],
+                    className='card-text',
+                )
             ],
-            value="completed",
-            labelStyle={'display': 'inline-block'}
-        ),
-        dcc.Graph(id='bar_graph')
-    ]),
+            className='shadow p-3 mb-5 bg-white rounded',
+            style={'margin': '20px'}  # Adjust outer margin as needed
+        )
+    ),
     html.Div([
         html.Div([dcc.Dropdown(
-                id='genre-dropdown',
-                options=list_of_all_genres,
-                value=['Action'],
-                multi=True
-            ),
-            dcc.Graph(id='genre-graph'), ],style={'width': '50%','border':'1px solid #ccc','padding':'10px'}),
+            id='genre-dropdown',
+            options=list_of_all_genres,
+            value=['Action'],
+            multi=True
+        ),
+            dcc.Graph(id='genre-graph'), ], style={'width': '50%', 'border': '1px solid #ccc', 'padding': '10px'}),
         dcc.Graph(figure=rating_evoution_over_decade()),
-    ],style={'display': 'flex', 'justify-content': 'space-around','flex-direction':'row','border':'1px solid #ccc','padding':'10px'}),
+    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-direction': 'row', 'border': '1px solid #ccc',
+              'padding': '10px'}),
     html.Div([
 
     ]),
@@ -239,19 +261,30 @@ def update_pie_chart(selected_value):
     Input('genre-dropdown', 'value')
 )
 def update_chart(selected_value):
-    # load data using os module
-    print(selected_value)
+    # Load data using os module
     data = pd.read_csv(os.path.abspath('./data/anime_cleaned.csv'))
-    # calculate number of releases selcted genres according to year
-    season_year = data['Premiered'].map(extract_season_year)
+
+    # Calculate number of releases for selected genres according to year
+    season_year = data['Premiered'].map(extract_season_year)  # Assuming extract_season_year is defined
     premiered_year = season_year.apply(lambda x: x[1])
     data['Premiered'] = premiered_year
-    # convert selected value to list
-    # if selected value is in particular anime's genres add it to list
-    # find all anime sthat have selected value in their genres
-    # below is wrong
+
+    # Convert selected_value to list if it's not already a list
+    selected_value = [selected_value] if not isinstance(selected_value, list) else selected_value
+
+    # Filter data for anime with selected genres
     data = data[data['Genres'].apply(lambda x: all(genre in x for genre in selected_value))]
-    # get number of releases per selected value according to year
+
+    # Get number of releases per selected genre according to year
     data = data.groupby(['Premiered']).size().reset_index(name='Number of Releases')
-    figure = px.line(data, x='Premiered', y='Number of Releases', title='Number of Releases per Genre')
+
+    # Create an interactive line chart using plotly express with customizations
+    figure = px.line(data, x='Premiered', y='Number of Releases', title='Number of Releases per Genre',
+                     color_discrete_sequence=px.colors.qualitative.Pastel,
+                     labels={'Premiered': 'Year', 'Number of Releases': 'Number of Releases'})
+
+    # Adjust legend position and add grid lines
+    figure.update_layout(legend=dict(x=0.02, y=0.98), xaxis=dict(showgrid=True, gridwidth=0.5, gridcolor='lightgray'),
+                         yaxis=dict(showgrid=True, gridwidth=0.5, gridcolor='lightgray'))
+
     return figure
