@@ -407,3 +407,7 @@ layout = html.Div([
     similar_page,
     pop_up
 ])
+# from dash import html
+# layout = html.Div([
+#
+# ])
