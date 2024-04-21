@@ -162,7 +162,7 @@ modal = dbc.Modal(
         dbc.ModalBody(
             [
                 dbc.Input(id='anime1', type='text', placeholder='Name of Anime 1'),
-                dbc.Input(id='anime2', type='text', placeholder='Anime 2'),
+                dbc.Input(id='anime2', type='text', placeholder='Name of Anime 2'),
                 html.Div(id='validation-message'),
                 dbc.Button("Compare", id='compare-button', n_clicks=0)
             ]

@@ -276,7 +276,6 @@ def page_layout(anime):
         G.add_edge(anime, similar, weight=edge_weights[i])
 
     # Calculate positions with force-directed layout
-    # Calculate positions with force-directed layout
     pos = nx.spring_layout(G)
 
     # Normalize positions (if needed)
@@ -300,7 +299,7 @@ def page_layout(anime):
         for source, target, weight in G.edges(data='weight')
     ]
 
-    print(elements)
+    # print(elements)
 
 
 
