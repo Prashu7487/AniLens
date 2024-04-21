@@ -106,47 +106,87 @@ def page_layout(anime1,anime2):
                         ])
                     ], style={'width': '40%', 'margin': '50px'}),  # Adjust margins as needed
                 ], style={'display': 'flex', 'justify-content': 'space-around'}), # Flexbox settings
+            # html.Div([
+            #     html.Div([
+            #         html.H3(f"Watching Status: {anime1}"),
+            #         dcc.Graph(
+            #             id='anime1-pie-chart',
+            #             figure=px.pie(
+            #                 pieChart_data_anime1,
+            #                 values=pieChart_data_anime1.values,
+            #                 names=pieChart_data_anime1.index,
+            #                 title='Anime 1 Viewing Status',
+            #                 color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
+            #             )
+            #         ),
+            #
+            #     ], style={'width': '40%', 'margin': '50px'}),
+            #     html.Div([
+            #         html.H3(f"Watching Status: {anime2}"),
+            #         dcc.Graph(
+            #             id='anime2-pie-chart',
+            #             figure=px.pie(
+            #                 pieChart_data_anime2,
+            #                 values=pieChart_data_anime2.values,
+            #                 names=pieChart_data_anime2.index,
+            #                 title='Anime 2 Viewing Status',
+            #                 color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
+            #             )
+            #         )
+            #     ], style={'width': '40%', 'margin': '50px'}),
+            # ], style={'display': 'flex', 'justify-content': 'space-around'}),
 
-            html.Div([
-                html.Div([
-                    html.H3(f"Watching Status: {anime1}"),
-                    dcc.Graph(
-                        id='anime1-pie-chart',
-                        figure=px.pie(
-                            pieChart_data_anime1,
-                            values=pieChart_data_anime1.values,
-                            names=pieChart_data_anime1.index,
-                            title='Anime 1 Viewing Status',
-                            color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
-                        )
-                    ),
 
-                ], style={'width': '40%', 'margin': '50px'}),
-                html.Div([
-                    html.H3(f"Watching Status: {anime2}"),
-                    dcc.Graph(
-                        id='anime2-pie-chart',
-                        figure=px.pie(
-                            pieChart_data_anime2,
-                            values=pieChart_data_anime2.values,
-                            names=pieChart_data_anime2.index,
-                            title='Anime 2 Viewing Status',
-                            color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
-                        )
+    # ... (Your code to generate pieChart_data_anime1, pieChart_data_anime2, color_map)
+
+    html.Div([  # Main container for cards
+        dbc.Card([
+            dbc.CardHeader(f"Watching Status: {anime1}"),
+            dbc.CardBody([
+                dcc.Graph(
+                    id='anime1-pie-chart',
+                    figure=px.pie(
+                        pieChart_data_anime1,
+                        values=pieChart_data_anime1.values,
+                        names=pieChart_data_anime1.index,
+                        title='Anime 1 Viewing Status',
+                        color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
                     )
-                ], style={'width': '40%', 'margin': '50px'}),
-            ], style={'display': 'flex', 'justify-content': 'space-around'}),
+                )
+            ])
+        ], style={'width': '40%', 'margin': '50px'}),
 
+        dbc.Card([
+            dbc.CardHeader(f"Watching Status: {anime2}"),
+            dbc.CardBody([
+                dcc.Graph(
+                    id='anime2-pie-chart',
+                    figure=px.pie(
+                        pieChart_data_anime2,
+                        values=pieChart_data_anime2.values,
+                        names=pieChart_data_anime2.index,
+                        title='Anime 2 Viewing Status',
+                        color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
+                    )
+                )
+            ])
+        ], style={'width': '40%', 'margin': '50px'}),
+
+    ], style={'display': 'flex', 'justify-content': 'space-around'})
+    ]),
+
+
+    dbc.Card([
+        dbc.CardHeader(html.H1(children='Anime Ratings Comparison'), style={'textAlign': 'center'}),  # Card Header
+        dbc.CardBody([  # Card body for content
             html.Div([
-                html.H1(children='Anime Ratings Comparison'),
                 dcc.Graph(figure=fig)
             ], style={'width': '90%', 'margin': '50px'}),
-        ], style={'width': '100%'}),  # Empty div to adjust margins
+        ]),
+        dbc.CardBody([], style={'width': '100%'}),  # Empty div to retain margins
+    ], style={'display': 'flex', 'justify-content': 'space-around'})
 
-
-
-    ], style={'display': 'flex', 'justify-content': 'space-around'}),  # Flexbox settings
-
+    ]),
     return comparison_layout
 
 

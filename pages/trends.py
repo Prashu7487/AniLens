@@ -23,6 +23,7 @@ def adaptation_source_trends():
     # Create a bar chart which shows the source of anime adaptations
     data = data.groupby(['Source', 'Premiered']).size().reset_index(name='Count')
     adaptation_fig = px.bar(data, x='Premiered', y='Count', color='Source', title='Adaptation Source Trends')
+    adaptation_fig.update_layout(bargap=0.6)
     return adaptation_fig
 
 
@@ -44,6 +45,7 @@ def seasonal_anime_ratings():
     data = data.groupby(['Premiered', 'Season']).agg({'Score': 'mean'}).reset_index()
     seasonal_fig = px.bar(data, x='Premiered', y='Score', color='Season', title='Seasonal Anime Ratings',
                           color_continuous_scale='plasma')
+    seasonal_fig.update_layout(bargap=0.6)
     return seasonal_fig
 
 
