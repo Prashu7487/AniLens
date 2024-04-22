@@ -1,6 +1,6 @@
 import pandas as pd
 import geopandas as gpd
-from dash import dcc, html, Input, Output, callback
+from dash import dcc, html, Input, Output, callback,State
 import numpy as np
 import plotly.express as px
 import dash_bootstrap_components as dbc
@@ -94,7 +94,7 @@ def rating_evoution_over_decade():
     # create a line plot and each point should have different icon
     symbol_sequence = ['circle', 'square', 'diamond', 'cross']
     decade_fig = px.line(data, x=data.index, y=data.columns, title='Rating Evolution Over Decade', markers=True,
-                         symbol="Rating")
+                         symbol="Rating",labels={'Decade': 'Decade', 'value': 'Number of Releases'})
     return decade_fig
 
 
@@ -144,7 +144,7 @@ list_of_all_genres = anime['Genres'].apply(lambda x: x.split(', ')).explode().un
 fig = px.choropleth(data_popularity, locations="iso_alpha",
                     color="Anime",
                     hover_data=["name", "Anime", "Genre"],
-                    color_continuous_scale="plasma",
+                    color_continuous_scale="Viridis",
                     projection="orthographic")
 
 fig.update_layout(margin=dict(l=60, r=60, t=50, b=50),
@@ -197,28 +197,96 @@ layout = html.Div([
             style={'margin': '20px'}  # Adjust outer margin as needed
         )
     ),
-    html.Div([
-        html.Div([dcc.Dropdown(
-            id='genre-dropdown',
-            options=list_of_all_genres,
-            value=['Action'],
-            multi=True
-        ),
-            dcc.Graph(id='genre-graph'), ], style={'width': '50%', 'border': '1px solid #ccc', 'padding': '10px'}),
-        dcc.Graph(figure=rating_evoution_over_decade()),
-    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-direction': 'row', 'border': '1px solid #ccc',
-              'padding': '10px'}),
-    html.Div([
-
+    html.Div(style={'margin': '5%'}, children=[
+        dbc.Card(style={ 'padding': '10px', 'width': '40%'}, children=[
+            dbc.CardBody([
+                html.H5("Genre Selection", className="card-title"),
+                dcc.Dropdown(
+                    id='genre-dropdown',
+                    options=list_of_all_genres,
+                    value=['Action'],
+                    multi=True,
+                    className="form-control",
+                ),
+                dcc.Graph(id='genre-graph', className="mt-3"),
+            ]),
+        ]),
+        dbc.Card(style={'width':'50%', 'padding': '10px'}, children=[
+            dbc.CardBody([
+                html.H5("Rating Evolution Over Decade", className="card-title"),
+                dcc.Graph(
+                    id='rating-evolution-graph',
+                    figure=rating_evoution_over_decade(),
+                    config={'displayModeBar': False},  # Disable Plotly's mode bar
+                ),
+            ]),
+        ]),
+    ], className="d-flex justify-content-around flex-row"),
+    html.Div(style={'margin': '20px 10%'}, children=[
+        dbc.Card(style={'margin-bottom': '20px'}, children=[
+            dbc.CardHeader(html.H5("Adaptation Source Trends")),
+            dbc.CardBody([
+                dcc.Graph(
+                    id='adaptation-graph',
+                    figure=adaptation_source_trends(),
+                    config={'displayModeBar': False},  # Disable Plotly's mode bar
+                ),
+            ]),
+        ]),
+        dbc.Card(style={'margin-bottom': '20px'}, children=[
+            dbc.CardHeader(html.H5("Seasonal Anime Ratings")),
+            dbc.CardBody([
+                dcc.Graph(
+                    id='seasonal-ratings-graph',
+                    figure=seasonal_anime_ratings(),
+                    config={'displayModeBar': False},  # Disable Plotly's mode bar
+                ),
+            ]),
+        ]),
     ]),
-    html.Div([
-        dcc.Graph(figure=adaptation_source_trends()),
-    ]),
-    html.Div([
-        dcc.Graph(figure=seasonal_anime_ratings()),
-    ]),
+    html.Div(style={'margin': '0 10%'}, children=[
+        dbc.Card(style={'margin-bottom': '20px'}, children=[
+            dbc.CardHeader(html.H5("Genre Selection")),
+            dbc.CardBody([
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("Genre:"),
+                        dcc.Dropdown(
+                            id='genre-dropdown_1',
+                            options=list_of_all_genres,
+                            value='Action',
+                            clearable=False,
+                            className="form-control",
+                        ),
+                    ]),
+                    dbc.Col([
+                        html.Label("Controversy"),
+                        dcc.Dropdown(
+                            id='genre-dropdown_2',
+                            options=[
+                                {"label": "Most Controversial Anime", "value": "Most Controversial Anime"},
+                                {"label": "Least Controversial Anime", "value": "Least Controversial Anime"},
+                            ],
+                            value='Most Controversial Anime',
+                            clearable=False,
+                            className="form-control",
+                        ),
+                    ]),
+                ]),
+                dbc.Button("Submit", id='submit-val', n_clicks=0, color="primary", className="mt-3"),
+            ]),
+        ]),
+        dbc.Card(children=[
+            dbc.CardHeader(html.H5("Controversial Anime Graph")),
+            dbc.CardBody([
+                dcc.Graph(
+                    id='contro-graph',
+                    style={'width': '100%', 'height': '400px'},  # Fixed width and height
+                ),
+            ]),
+        ]),
+    ])
 ])
-
 
 @callback(
     Output('bar_graph', 'figure'),
@@ -290,3 +358,132 @@ def update_chart(selected_value):
                          yaxis=dict(showgrid=True, gridwidth=0.5, gridcolor='lightgray'))
 
     return figure
+
+@callback(
+    Output('contro-graph', 'figure'),
+    [State('genre-dropdown_1', 'value'),
+    State('genre-dropdown_2', 'value')],
+    Input('submit-val', 'n_clicks')
+)
+
+def update_contro(n_clicks, genre_1, genre_2):
+    Anime_df = pd.read_csv(os.path.abspath('./data/anime_cleaned.csv'))
+    Anime_df['Score-10'] = Anime_df['Score-10'].str.replace('Unknown', '0')
+    Anime_df['Score-9'] = Anime_df['Score-9'].str.replace('Unknown', '0')
+    Anime_df['Score-8'] = Anime_df['Score-8'].str.replace('Unknown', '0')
+    Anime_df['Score-7'] = Anime_df['Score-7'].str.replace('Unknown', '0')
+    Anime_df['Score-6'] = Anime_df['Score-6'].str.replace('Unknown', '0')
+    Anime_df['Score-5'] = Anime_df['Score-5'].str.replace('Unknown', '0')
+    Anime_df['Score-4'] = Anime_df['Score-4'].str.replace('Unknown', '0')
+    Anime_df['Score-3'] = Anime_df['Score-3'].str.replace('Unknown', '0')
+    Anime_df['Score-2'] = Anime_df['Score-2'].str.replace('Unknown', '0')
+    Anime_df['Score-1'] = Anime_df['Score-1'].str.replace('Unknown', '0')
+    Anime_df['Score-10'] = Anime_df['Score-10'].astype(float)
+    Anime_df['Score-9'] = Anime_df['Score-9'].astype(float)
+    Anime_df['Score-8'] = Anime_df['Score-8'].astype(float)
+    Anime_df['Score-7'] = Anime_df['Score-7'].astype(float)
+    Anime_df['Score-6'] = Anime_df['Score-6'].astype(float)
+    Anime_df['Score-5'] = Anime_df['Score-5'].astype(float)
+    Anime_df['Score-4'] = Anime_df['Score-4'].astype(float)
+    Anime_df['Score-3'] = Anime_df['Score-3'].astype(float)
+    Anime_df['Score-2'] = Anime_df['Score-2'].astype(float)
+    Anime_df['Score-1'] = Anime_df['Score-1'].astype(float)
+    Anime_df['Score'] = Anime_df['Score'].str.replace('Unknown', '0')
+    Anime_df['Score'] = Anime_df['Score'].astype(float)
+    Anime_df['Total_Votes'] = (
+            Anime_df['Score-10'] + Anime_df['Score-9'] + Anime_df['Score-8'] + Anime_df['Score-7'] + Anime_df[
+        'Score-6'] +
+            Anime_df['Score-5'] + Anime_df['Score-4'] + Anime_df['Score-3'] + Anime_df['Score-2'] + Anime_df[
+                'Score-1'])
+    Anime_df['Total_Votes'] = Anime_df['Total_Votes'].astype(int)
+    multiplication_factors = {'Score-10': 10,
+                              'Score-9': 9,
+                              'Score-8': 8,
+                              'Score-7': 7,
+                              'Score-6': 6,
+                              'Score-5': 5,
+                              'Score-4': 4,
+                              'Score-3': 3,
+                              'Score-2': 2,
+                              'Score-1': 1
+                              }
+
+    for col, factor in multiplication_factors.items():
+        Anime_df[col + '_multiplied'] = Anime_df[col] * factor - Anime_df['Score']
+    Anime_df['SD'] = Anime_df[['Score-10_multiplied',
+                               'Score-9_multiplied',
+                               'Score-8_multiplied',
+                               'Score-7_multiplied',
+                               'Score-6_multiplied',
+                               'Score-5_multiplied',
+                               'Score-4_multiplied',
+                               'Score-3_multiplied',
+                               'Score-2_multiplied',
+                               'Score-1_multiplied'
+                               ]].std(axis=1)
+
+    df_split = Anime_df['Genres'].str.split(', ', expand=True)
+
+    # Creating a new DataFrame by stacking the split values
+    df_split = df_split.stack().reset_index(level=1, drop=True).rename('Genre')
+
+    # Merging the original DataFrame with the split DataFrame based on the index
+    Anime_df = Anime_df.drop('Genres', axis=1).merge(df_split, left_index=True, right_index=True)
+
+    Anime_df['Genre'] = Anime_df['Genre'].str.replace(' ', '')
+
+    Genres = Anime_df['Genre'].unique()
+
+    Anime_df = Anime_df.sort_values(by=['Genre'])
+
+    grouped = Anime_df.groupby('Genre')
+
+    # Iterate over the groups and create separate dataframes
+    for category, group in grouped:
+        globals()['df_' + category] = group
+        globals()['df_' + category] = globals()['df_' + category][globals()['df_' + category]['Total_Votes'] > 100000]
+        globals()['df_' + category].loc[:, 'SD'] = globals()['df_' + category]['SD'] / globals()['df_' + category][
+            'Total_Votes']
+
+    Genre_list = 'df_'+list_of_all_genres[genre_2]
+
+    if genre_1 == 'Most Controversial Anime':
+        temp_df1 = globals()[Genre_list].sort_values(by=['SD'], ascending=False)
+        top10_Name = temp_df1.head(10)['Name'].tolist()
+        top10_SD = temp_df1.head(10)['SD'].tolist()
+
+        temp_df2 = globals()[Genre_list][globals()[Genre_list]['Score'] > 8]
+        temp_df2 = temp_df2.sort_values(by=['SD'], ascending=False)
+        top10_Name_8 = temp_df2.head(10)['Name'].tolist()
+        top10_SD_8 = temp_df2.head(10)['SD'].tolist()
+    else:
+        temp_df1 = globals()[Genre_list].sort_values(by=['SD'], ascending=False)
+        top10_Name = temp_df1.tail(10)['Name'].tolist()
+        top10_Name.reverse()
+        top10_SD = temp_df1.tail(10)['SD'].tolist()
+        top10_SD.reverse()
+
+        temp_df2 = globals()[Genre_list][globals()[Genre_list]['Score'] > 7]
+        temp_df2 = temp_df2.sort_values(by=['SD'], ascending=False)
+        top10_Name_8 = temp_df2.tail(10)['Name'].tolist()
+        top10_Name_8.reverse()
+        top10_SD_8 = temp_df2.tail(10)['SD'].tolist()
+        top10_SD_8.reverse()
+    genre_val = list_of_all_genres[genre_2]
+    #do not show label on x axis
+    new_label = []
+    #add first letter of each word in name
+    for name in top10_Name:
+        temp = name.split()
+        # if name has no spaces then add full one
+        if len(temp) == 1:
+            new_label.append(name)
+        else:
+            new_label.append(''.join([x[0] for x in temp]))
+    # create list with short names and long names
+    new = {'Short Name': new_label, 'Long Name': top10_Name,'val':top10_SD}
+    fig = px.bar(new, x='Short Name', y='val', title=f'{genre_val} Anime',hover_data='Long Name',labels={'x':'Anime','y':'SD'})
+    #show abrevated names on xaxis
+    fig.update_layout(bargap=0.6)
+    return fig
+
