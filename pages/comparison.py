@@ -106,38 +106,7 @@ def page_layout(anime1,anime2):
                         ])
                     ], style={'width': '40%', 'margin': '50px'}),  # Adjust margins as needed
                 ], style={'display': 'flex', 'justify-content': 'space-around'}), # Flexbox settings
-            # html.Div([
-            #     html.Div([
-            #         html.H3(f"Watching Status: {anime1}"),
-            #         dcc.Graph(
-            #             id='anime1-pie-chart',
-            #             figure=px.pie(
-            #                 pieChart_data_anime1,
-            #                 values=pieChart_data_anime1.values,
-            #                 names=pieChart_data_anime1.index,
-            #                 title='Anime 1 Viewing Status',
-            #                 color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
-            #             )
-            #         ),
-            #
-            #     ], style={'width': '40%', 'margin': '50px'}),
-            #     html.Div([
-            #         html.H3(f"Watching Status: {anime2}"),
-            #         dcc.Graph(
-            #             id='anime2-pie-chart',
-            #             figure=px.pie(
-            #                 pieChart_data_anime2,
-            #                 values=pieChart_data_anime2.values,
-            #                 names=pieChart_data_anime2.index,
-            #                 title='Anime 2 Viewing Status',
-            #                 color=[color_map[label] for label in pieChart_data_anime1.index.tolist()[:5]]
-            #             )
-            #         )
-            #     ], style={'width': '40%', 'margin': '50px'}),
-            # ], style={'display': 'flex', 'justify-content': 'space-around'}),
 
-
-    # ... (Your code to generate pieChart_data_anime1, pieChart_data_anime2, color_map)
 
     html.Div([  # Main container for cards
         dbc.Card([

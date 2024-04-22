@@ -370,12 +370,82 @@ def update_studio_graphs(year_range):
 
     return fig_donut, fig_top_anime, fig_stats
 
-#
-    #########################################################################################  Home_Layout
+#########################################################################################  Component 4
+
+# Load your dataset (replace with the actual path to your file)
+df = pd.read_csv('./data/anime.csv')
+
+# Calculate the number of anime per genre
+anime_per_genre = df['Genres'].str.split(', ').explode().value_counts()
+
+anime_per_genre.sort_values(ascending=False, inplace=True)
+anime_per_genre = anime_per_genre[:10]
+# Create the Pie Chart
+genreDistribution = px.pie(anime_per_genre,
+             values=anime_per_genre.values,
+             names=anime_per_genre.index,
+             title='Distribution of Anime Genres')
+
+# component_4 = html.Div(children=[
+#     html.H1(children='Anime Genre Distribution'),
+#     dcc.Graph(
+#         figure=genreDistribution
+#     )
+# ])
+
+card_1 = dbc.Card(
+    [
+        dbc.CardHeader(html.H3(children='Anime Genre Distribution')),
+        dbc.CardBody(dcc.Graph(figure=genreDistribution))
+    ],
+    style={"width": "100%"}
+)
+
+#########################################################################################  Component 4: Card
+#drop those rows where either episodes or duration is missing
+
+df = df.dropna(subset=['Episodes', 'Duration'])
+df['Total Length (min)'] = df.apply(lambda row: int(row['Duration'].split()[0]) * int(row['Episodes']) if row['Duration'] != 'Unknown' and row['Episodes'] != 'Unknown' else None, axis=1)
+
+# Create the line graph
+animeLengthDistribution = px.line(df, x='MAL_ID', y='Total Length (min)', title='Anime Length Distribution')
+
+
+
+
+# Create card for duration line graph
+card_2 = dbc.Card(
+    [
+        dbc.CardHeader(html.H3(children='Anime Length Distribution')),
+        dbc.CardBody(dcc.Graph(figure=animeLengthDistribution))
+    ],
+    style={"width": "100%"}
+)
+
+# Layout with 50/50 split
+component_4 = html.Div([
+    dbc.Row([
+        dbc.Col(card_1, width=6),  # 6 columns for 50% width
+        dbc.Col(card_2, width=6)
+    ])
+])
+
+#########################################################################################  Home_Layout
 
 
 layout = dbc.Container([
     component_1,
     component_2,
-    component_3
+    component_3,
+    component_4
+
 ], fluid=True, style={'margin': 'auto', 'width': '100%'})
+
+# def searchAndPrintAnime(df, mal_id):
+#     anime = df[df['MAL_ID'] == mal_id]
+#     for col in anime.columns:
+#         print(f"{col}: {anime[col].values[0]}")
+#
+#
+#
+# searchAndPrintAnime(df, 6277)

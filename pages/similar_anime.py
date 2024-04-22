@@ -308,9 +308,10 @@ def page_layout(anime):
             id='cytoscape',
             elements=elements,
             layout={'name': 'cose'},  # Adjust layout as needed
-            style={'width': '100%', 'height': '600px'},
+            style={'width': '100%', 'height': '600px', 'border-width': '10px', 'border-color': 'black',},
 
             stylesheet=[
+
             {
                 'selector': 'node',
                 'style': {
