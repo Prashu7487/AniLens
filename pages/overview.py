@@ -322,14 +322,14 @@ def update_studio_graphs(year_range):
 
     def get_top_anime_by_studio(df, year_range):
         studios_top_anime = (df[df['Premiered'].between(*year_range)]
-                             .groupby(['Studios', 'Name'])
+                             .groupby(['Studios'])
                              ['Completed']
                              .max()
                              .reset_index()
                              .sort_values(['Studios', 'Completed'], ascending=False))
 
         # Get top 15 studios first
-        top_studios = studios_top_anime['Studios'].unique()[:15]
+        top_studios = studios_top_anime['Studios'].unique()[:8]
         return studios_top_anime[studios_top_anime['Studios'].isin(top_studios)].groupby('Studios').head(1)
 
     def get_studio_stats(df, year_range):
@@ -338,24 +338,37 @@ def update_studio_graphs(year_range):
                       .mean()
                       .reset_index())
         return studio_avg
+        # # return df[df['Premiered'].between(*year_range)].groupby('Studios').agg({'Completed': 'mean', 'Popularity': 'mean'}).reset_index()/
+        # #get atudio year wise data
+        # studio = []
+        # for i in range(year_range[0], year_range[1]+1):
+        #     studio_avg = (df[df['Premiered'] == i]
+        #                   .groupby('Studios')[['Completed', 'Popularity']]
+        #                   .mean()
+        #                   .reset_index())
+        #     studio.append(studio_avg)
+        # return studio
+
 
     filtered_df = data
     studio_counts = get_studio_contributions(filtered_df, year_range)
+    #remove unknown studios
     top_anime = get_top_anime_by_studio(filtered_df, year_range)
     studio_stats = get_studio_stats(filtered_df, year_range)
-
+    #Get top8 studios
+    studio_counts = studio_counts.head(8)
     # Donut Graph - Create a color dictionary and get colors for legend
     studio_colors = px.colors.qualitative.Plotly[:len(studio_counts)]  # Truncate to top 15
     color_dict = dict(zip(studio_counts['Studios'], studio_colors))  # Main color mapping
 
     fig_donut = px.pie(studio_counts, values='Percent', names='Studios', hole=0.4,
-                       title='Studio Contributions (Top 15)',
+                       title='Studio Contributions (Top 8)',
                        color='Studios', color_discrete_map=color_dict)
     # ...
 
     # Horizontal Histogram - Updated for labels above bars
     fig_top_anime = px.bar(top_anime, x='Completed', y='Studios', orientation='h',
-                           title='Top Anime by Studio (Top 15)',
+                           title='Top Anime by Studio (Top 8)',
                            color='Studios', color_discrete_map=color_dict)
     fig_top_anime.update_traces(textposition='outside')
     fig_top_anime.update_layout(showlegend=True,
@@ -364,7 +377,7 @@ def update_studio_graphs(year_range):
     # ...
 
     fig_stats = px.line(studio_stats, x='Studios', y=['Completed', 'Popularity'],
-                        title='Average Metrics by Studio (Top 15)', log_y=True)  # Log scale on y-axis
+                        title='Average Metrics by Studio (Top 8)', log_y=True)  # Log scale on y-axis
     fig_stats.update_layout(height=800)
     # ...
 
