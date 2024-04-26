@@ -1,7 +1,4 @@
-import dash_bootstrap_components as dbc
-from dash import html
 import os
-
 import dash
 import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
@@ -16,6 +13,7 @@ from tensorflow.keras.layers import Activation, BatchNormalization, Input, Embed
     Dot, Dense, Flatten
 from tensorflow.keras.models import Model
 from dash import html
+
 MIN_LR = 1e-5  # minimum learning rate
 MAX_LR = 5e-4  # maximum learning rate
 BS = 10000  # batch_size
@@ -25,12 +23,9 @@ ANIME_EMB_SIZE = 128
 EMBEDDING_SIZES = (USER_EMB_SIZE, ANIME_EMB_SIZE)
 
 abs_path = os.path.abspath("./data/")
-# print(abs_path)
-ENCODER_PATH = os.path.join(abs_path, 'encoder_dicts.joblib')
 
-# ENCODER_PATH = 'encoder_dicts.joblib'
+ENCODER_PATH = os.path.join(abs_path, 'encoder_dicts.joblib')
 encoders_dict = joblib.load(ENCODER_PATH)
-# print(encoders_dict.keys())
 
 anime_id_to_idx = encoders_dict['anime_id_to_idx']
 anime_idx_to_id = encoders_dict['anime_idx_to_id']
@@ -38,8 +33,6 @@ user_id_to_idx = encoders_dict['user_id_to_idx']
 user_idx_to_id = encoders_dict['user_idx_to_id']
 
 n_users, n_animes = len(user_id_to_idx), len(anime_id_to_idx)
-# n_users, n_animes
-
 K = keras.backend
 
 
@@ -63,8 +56,6 @@ class RecommenderModel(Model):
         self.dot_layer = Dot(name='dot_product', normalize=True, axes=1)
         self.layers_ = [
             Flatten(),
-
-            #             bias is not needed when using BatchNorm
             Dense(128, activation=activation, use_bias=False, kernel_initializer='he_normal'),
             BatchNormalization(),
             Dense(64, activation=activation, use_bias=False, kernel_initializer='he_normal'),
@@ -84,12 +75,9 @@ class RecommenderModel(Model):
 
 
 def get_model():
-    # print("[INFO] Using Subclassing API Model")
     K.clear_session()
-
     model = RecommenderModel(n_users, n_animes, EMBEDDING_SIZES)
     model.compile(loss='binary_crossentropy', metrics=['mae', 'mse'], optimizer='adam')
-
     return model
 
 
@@ -133,10 +121,7 @@ def get_functional_model():
 
 
 model = get_functional_model()
-
 WEIGHTS_PATH = os.path.abspath("./recomendation/weights.h5")
-# print(WEIGHTS_PATH)
-
 
 def load_trained_model():
     model = get_model()
@@ -144,9 +129,7 @@ def load_trained_model():
     model.load_weights(WEIGHTS_PATH)
     return model
 
-
 model = load_trained_model()
-
 
 def extract_weights(name, model):
     weight_layer = model.get_layer(name)
@@ -298,11 +281,6 @@ def page_layout(anime):
         {'data': {'source': source, 'target': target, 'weight': weight}}
         for source, target, weight in G.edges(data='weight')
     ]
-
-    # print(elements)
-
-
-
     return html.Div([
         cyto.Cytoscape(
             id='cytoscape',
@@ -329,21 +307,16 @@ def page_layout(anime):
                     'width': '2px'  # Adjust edge thickness
                 }
             }
-        ]
-
-
-
+            ]
         )
     ])
 
-
-#################################################################################################################
 #################################################################################################################
 # **Layout**
 #################################################################################################################
-#################################################################################################################
-similar_page = html.Div(id='main-container-similar')
 
+
+similar_page = html.Div(id='main-container-similar')
 pop_up = dbc.Modal(
     [
         dbc.ModalHeader(dbc.ModalTitle("Enter Anime Name")),
@@ -359,10 +332,12 @@ pop_up = dbc.Modal(
         ),
     ],
     id="pop_up",
-    is_open=True,  # Initially open
+    is_open=True,
     centered=True,
 )
 from dash import callback, Output, Input, State
+
+
 @callback(
     Output('pop_up', 'is_open'),
     Output('main-container-similar', 'children'),
@@ -396,11 +371,6 @@ def search_animes(compare_clicks, close_clicks, anime, is_open):
     else:
         return True, None, ''
 
-
-#################################################################################################################
-#################################################################################################################
-# ** Main Layout **
-#################################################################################################################
 #################################################################################################################
 
 
@@ -408,7 +378,3 @@ layout = html.Div([
     similar_page,
     pop_up
 ])
-# from dash import html
-# layout = html.Div([
-#
-# ])
