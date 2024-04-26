@@ -62,14 +62,12 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 ![Screenshot 2](/demo/top_anime.png)
 *Most-watched based on filters*
 
-![Demo](/demo/studio_analysis.gif)
+<img src="/demo/studio_analysis.gif" alt="Demo" width="800">
 
 ![Screenshot 3](/demo/static_graphs.png)
 *Some distributions in the data*
 
-![Demo](/demo/similar_anime.gif)
-
-![Demo](/demo/world_map.gif)
+![Demo](/demo/similar_anime.gif) ![Demo](/demo/world_map.gif)
 
 
 ## License
