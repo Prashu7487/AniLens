@@ -292,14 +292,13 @@ anime_per_genre.sort_values(ascending=False, inplace=True)
 total_anime = anime_per_genre.sum()
 genre_percentage = (anime_per_genre / total_anime) * 100
 
-# Create sunburst chart
-genreDistribution = go.Figure(go.Sunburst(
+# Creating treemap visualizations for distributions of anime genre
+genreDistribution = go.Figure(data=[go.Treemap(
     labels=anime_per_genre.index.tolist(),
     parents=[''] * len(anime_per_genre),
     values=genre_percentage.values,
-    branchvalues="total",  # Display percentages relative to the root
-))
-
+    branchvalues='total'
+)])
 
 card_1 = dbc.Card(
     [

@@ -4,6 +4,8 @@
 
 import pandas as pd
 import plotly.express as px
+import numpy as np
+
 
 def get_studio_contributions(df, year_range):
     """
@@ -62,16 +64,11 @@ def avg_watched_and_popularity_per_year_per_studio(studio_names, df, year_range)
 
 # Function to visualize the number of anime for each rating type using an interactive pie chart
 def visualize_anime_count_by_rating_pie_interactive(anime_data):
-    # Count the number of anime for each rating type
     rating_counts = anime_data['Rating'].value_counts()
-    # Create a DataFrame from rating counts
     rating_counts_df = pd.DataFrame({'Rating': rating_counts.index, 'Count': rating_counts.values})
-    # Define custom colors with dark slices and light labels
     custom_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
-    # Create an interactive pie chart using Plotly Express
     fig = px.pie(rating_counts_df, values='Count', names='Rating', title='Distribution of Anime for Each Rating Type',
                  color_discrete_sequence=custom_colors)
-    # Update pie chart layout to show count as percentage
     fig.update_traces(textinfo='percent+label', hoverinfo='label+percent+value')
-    # Return the interactive pie chart
     return fig
+
