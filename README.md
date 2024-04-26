@@ -67,7 +67,7 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 ![Screenshot 3](/demo/static_graphs.png)
 *Some distributions in the data*
 
-![Demo](/demo/similar_anime.gif) ![Demo](/demo/world_map.gif)
+<img src="/demo/similar_anime.gif" alt="Demo" style="display:inline-block; margin-right: 20px;"> <img src="/demo/world_map.gif" alt="Demo" style="display:inline-block;">
 
 
 ## License
