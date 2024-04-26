@@ -29,12 +29,13 @@ df_filtered = df.loc[filter_condition]
 df = df[df['Score'] != 'Unknown']
 # print(df['Score'])
 # Create scatter plot of 'Score' versus 'Members' with a best-fitted line
-scatter_fig = px.scatter(df, x='Members', y='Score', title='Scatter Plot of Score vs Members')
+scatter_fig = px.scatter(df, x='Members', y='Score', title='Scatter Plot of Score vs Community Members')
 
 # Create pie chart for distribution of average favorites among top anime sources
 source_favorites = df.groupby('Source')['Favorites'].mean().reset_index()
 top_sources = source_favorites.sort_values(by='Favorites', ascending=False).head(10)
-pie_fig = px.pie(top_sources, values='Favorites', names='Source', title='Distribution of Average Favorites Among Top Anime Sources')
+pie_fig = px.pie(top_sources, values='Favorites', names='Source',
+                 title='Distribution of Average Favorites Among Top Anime Sources')
 
 # Create box plot for 'Score' by 'Type'
 box_fig = px.box(df, x='Type', y='Score', title='Box Plot of Score by Type', points=False)
@@ -50,15 +51,15 @@ treemap_fig = px.treemap(genre_counts_df, path=['Genre'], values='Count', title=
 layout = dbc.Container([
     html.H3("These static graphs are for analysis purposes."
             " Each graph reveals common patterns in the data or provides insights about the user behavior.",
-            style={'marginTop': '50px', 'textAlign': 'center'}),
+            style={'marginTop': '50px','marginBottom': '100px', 'textAlign': 'center'}),
     dbc.Row([
         dbc.Col(html.Div(dcc.Graph(figure=pie_fig)), width=6),
         dbc.Col(html.Div(dcc.Graph(figure=box_fig)), width=6),
-    ], style={'margin-bottom': '100px'}),
+    ], style={'margin-bottom': '80px'}),
     dbc.Row([
         dbc.Col(html.Div(dcc.Graph(figure=box_members_fig)), width=6),
         dbc.Col(html.Div(dcc.Graph(figure=treemap_fig)), width=6),
-    ], style={'margin-bottom': '100px'}),
+    ], style={'margin-bottom': '80px'}),
     dbc.Row([
         dbc.Col(html.Div(dcc.Graph(figure=scatter_fig)), width=12),
     ], style={'margin-bottom': '200px'}),
